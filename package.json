@@ -1,0 +1,14 @@
+{
+  "name": "my-n8n-recap",
+  "version": "1.0.0",
+  "description": "n8n with yt-dlp and ffmpeg stack",
+  "main": "index.js",
+  "scripts": {
+    "install-tools": "mkdir -p /home/node/.n8n-files/movie-recap && python3 -m venv opt/venv && opt/venv/bin/pip install -U yt-dlp",
+    "build": "npm run install-tools",
+    "start": "n8n start"
+  },
+  "dependencies": {
+    "n8n": "latest"
+  }
+}
