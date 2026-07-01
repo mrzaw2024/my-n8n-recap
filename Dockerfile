@@ -1,25 +1,27 @@
-FROM n8nio/n8n:latest
+FROM python:3.10-slim
 
+# root အနေဖြင့် လိုအပ်သော Linux tools အားလုံး သွင်းခြင်း
 USER root
-
-# Debian စနစ်အတွက် apt သုံးပြီး ffmpeg နှင့် python သွင်းခြင်း
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
     ffmpeg \
-    python3 \
-    python3-pip \
-    python3-venv \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# virtual environment ဆောက်ပြီး yt-dlp သွင်းခြင်း
-RUN python3 -m venv /opt/venv && \
-    /opt/venv/bin/pip install --no-cache-dir -U yt-dlp
+# Node.js နှင့် n8n ကို တိုက်ရိုက် သွင်းခြင်း
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs && \
+    npm install -g n8n@latest
 
-# ပတ်လမ်းကြောင်း သတ်မှတ်ချက်
-ENV PATH="/opt/venv/bin:$PATH"
+# yt-dlp ကို သွင်းခြင်း
+RUN pip install --no-cache-dir -U yt-dlp
 
-# Bro ရဲ့ JSON ထဲကအတိုင်း ဖိုင်တွဲဆောက်ပြီး ခွင့်ပြုချက်ပေးခြင်း
+# Bro ရဲ့ JSON ထဲက ပတ်လမ်းကြောင်းအတိုင်း Folder ဆောက်ပြီး ခွင့်ပြုချက်ပေးခြင်း
 RUN mkdir -p /home/node/.n8n-files/movie-recap && \
-    chown -R node:node /home/node/
+    useradd -u 1000 node || true && \
+    chown -R 1000:1000 /home/node/
 
-USER node
+# Port ဖွင့်ခြင်းနှင့် မောင်းနှင်ခြင်း
+EXPOSE 5678
+USER 1000
+CMD ["n8n", "start"]
